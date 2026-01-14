@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ChevronRight, Phone } from "lucide-react";
 import About2 from "../assets/Rawat band Back Burari.jpg";
 import shop from "../assets/Uttranchal Rawat Band shop.jpg";
@@ -6,15 +6,25 @@ import umbrella from "../assets/Utranchal Rawat Band Umbrella-Lights.png";
 import vintage from "../../src/assets/vintage6.jpg";
 import punjabi from "../../src/assets/punjabi1.jpg";
 import ghodi from "../assets/ghodi5.jpg";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import bgImg from "../assets/1 vector.svg";
 import icon1 from "../assets/2 Drum vector.svg";
+import emailjs from "@emailjs/browser";
 import icon2 from "../assets/2 Tuba vector.svg";
 
 const About = () => {
   const [playVideo, setPlayVideo] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    phone: "",
+    message: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState("");
 
   const shortText =
     "Since 2005, we have made thousands of baraats and receptions across Delhi-NCR unforgettable with live music, powerful dhol beats, and a royal presentation. Our focus is simple: blend tradition with modern style so every entry, turn, and finale feels iconic.";
@@ -61,6 +71,45 @@ const About = () => {
         ease: "easeOut",
       },
     },
+  };
+
+  useEffect(() => {
+    emailjs.init("RV2o9yJY7WLn1hHM8");
+  }, []);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus("");
+
+    try {
+      await emailjs.send(
+        "service_j95rz85",
+        "template_s4qyanm",
+        {
+          from_name: formData.name,
+          from_email: formData.email,
+          subject: formData.subject,
+          phone: formData.phone,
+          message: formData.message,
+          to_name: "Rawat Band",
+        },
+        "RV2o9yJY7WLn1hHM8"
+      );
+
+      setSubmitStatus("success");
+      setFormData({ name: "", email: "", subject: "", phone: "", message: "" });
+    } catch (error) {
+      console.error("EmailJS Error:", error);
+      setSubmitStatus("error");
+    } finally {
+      setIsSubmitting(false);
+      setTimeout(() => setSubmitStatus(""), 5000);
+    }
   };
 
   return (
@@ -746,144 +795,103 @@ const About = () => {
               </div>
 
               {/* Right Section - Booking Form */}
-              <div className="relative">
-                <div className="hidden md:block absolute -top-10 -right-10 grid grid-cols-12 gap-1 opacity-30">
-                  {[...Array(60)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="w-1 h-1 bg-amber-700 rounded-full"
-                    ></div>
-                  ))}
+              <div className="w-full bg-white p-8 md:p-12 shadow-2xl rounded-sm border-t-4 border-amber-600">
+                <div className="mb-10 text-center">
+                  <span className="text-amber-600 text-xs font-bold tracking-[0.3em] uppercase block mb-2">
+                    Get in Touch
+                  </span>
+                  <h2 className="text-3xl font-serif text-gray-900">
+                    Send Us a Message
+                  </h2>
                 </div>
 
-                <div className="hidden md:block absolute -bottom-16 -right-10 grid grid-cols-12 gap-1 opacity-30">
-                  {[...Array(72)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="w-1 h-1 bg-amber-700 rounded-full"
-                    ></div>
-                  ))}
-                </div>
-
-                <div className="bg-stone-50 p-6 sm:p-8 md:p-10 relative">
-                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 sm:w-20 h-1 bg-amber-700"></div>
-
-                  <div className="flex flex-wrap items-center gap-2 text-[10px] sm:text-xs tracking-widest text-gray-500 mb-3 sm:mb-4 font-light pt-4">
-                    <span>EVENTS & PERFORMANCES</span>
-                    <svg
-                      className="w-6 h-2 sm:w-8 sm:h-3"
-                      viewBox="0 0 30 12"
-                      fill="none"
+                <AnimatePresence>
+                  {submitStatus === "success" && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mb-6 p-4 bg-green-50 text-green-700 border-l-4 border-green-500 text-sm"
                     >
-                      <path
-                        d="M1 6C1 6 5 1 10 1C15 1 15 6 20 6C25 6 29 1 29 1"
-                        stroke="#b89968"
-                        strokeWidth="1.5"
-                      />
-                      <path
-                        d="M1 11C1 11 5 6 10 6C15 6 15 11 20 11C25 11 29 6 29 6"
-                        stroke="#b89968"
-                        strokeWidth="1.5"
-                      />
-                    </svg>
+                      ✓ Thank you! Your message has been sent successfully.
+                    </motion.div>
+                  )}
+                  {submitStatus === "error" && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mb-6 p-4 bg-red-50 text-red-700 border-l-4 border-red-500 text-sm"
+                    >
+                      ✗ Oops! Something went wrong.
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <input
+                      type="text"
+                      name="name"
+                      required
+                      value={formData.name}
+                      onChange={handleChange}
+                      disabled={isSubmitting}
+                      placeholder="Your Name"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-amber-600 outline-none transition-all"
+                    />
+                    <input
+                      type="email"
+                      name="email"
+                      required
+                      value={formData.email}
+                      onChange={handleChange}
+                      disabled={isSubmitting}
+                      placeholder="Email Address"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-amber-600 outline-none transition-all"
+                    />
                   </div>
-
-                  <h3 className="text-2xl sm:text-3xl md:text-4xl font-serif text-gray-800 mb-6 sm:mb-8">
-                    Band Booking
-                  </h3>
-
-                  <div className="space-y-3 sm:space-y-4">
-                    <div className="relative">
-                      <input
-                        type="text"
-                        placeholder="Check in"
-                        onFocus={(e) => (e.target.type = "date")}
-                        onBlur={(e) => {
-                          if (!e.target.value) e.target.type = "text";
-                        }}
-                        className="w-full px-4 sm:px-6 py-3 sm:py-4 bg-white border border-gray-300 text-gray-600 placeholder-gray-400 focus:outline-none focus:border-amber-700 transition-colors text-sm sm:text-base"
-                      />
-                      <svg
-                        className="absolute right-4 sm:right-6 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 pointer-events-none"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="#b89968"
-                        strokeWidth="2"
-                      >
-                        <rect x="3" y="4" width="18" height="18" rx="2" />
-                        <line x1="3" y1="10" x2="21" y2="10" />
-                        <line x1="8" y1="2" x2="8" y2="6" />
-                        <line x1="16" y1="2" x2="16" y2="6" />
-                      </svg>
-                    </div>
-
-                    <div className="relative">
-                      <input
-                        type="text"
-                        placeholder="Check out"
-                        onFocus={(e) => (e.target.type = "date")}
-                        onBlur={(e) => {
-                          if (!e.target.value) e.target.type = "text";
-                        }}
-                        className="w-full px-4 sm:px-6 py-3 sm:py-4 bg-white border border-gray-300 text-gray-600 placeholder-gray-400 focus:outline-none focus:border-amber-700 transition-colors text-sm sm:text-base"
-                      />
-                      <svg
-                        className="absolute right-4 sm:right-6 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 pointer-events-none"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="#b89968"
-                        strokeWidth="2"
-                      >
-                        <rect x="3" y="4" width="18" height="18" rx="2" />
-                        <line x1="3" y1="10" x2="21" y2="10" />
-                        <line x1="8" y1="2" x2="8" y2="6" />
-                        <line x1="16" y1="2" x2="16" y2="6" />
-                      </svg>
-                    </div>
-
-                    <div className="relative">
-                      <select className="w-full px-4 sm:px-6 py-3 sm:py-4 bg-white border border-gray-300 text-gray-600 appearance-none focus:outline-none focus:border-amber-700 transition-colors cursor-pointer text-sm sm:text-base">
-                        <option>Adult</option>
-                        <option>1 Adult</option>
-                        <option>2 Adults</option>
-                        <option>3 Adults</option>
-                        <option>4 Adults</option>
-                      </select>
-                      <svg
-                        className="absolute right-4 sm:right-6 top-1/2 transform -translate-y-1/2 w-3 h-3 sm:w-4 sm:h-4 pointer-events-none"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="#b89968"
-                        strokeWidth="2"
-                      >
-                        <polyline points="6 9 12 15 18 9" />
-                      </svg>
-                    </div>
-
-                    <div className="relative">
-                      <select className="w-full px-4 sm:px-6 py-3 sm:py-4 bg-white border border-gray-300 text-gray-600 appearance-none focus:outline-none focus:border-amber-700 transition-colors cursor-pointer text-sm sm:text-base">
-                        <option>Children</option>
-                        <option>0 Children</option>
-                        <option>1 Child</option>
-                        <option>2 Children</option>
-                        <option>3 Children</option>
-                      </select>
-                      <svg
-                        className="absolute right-4 sm:right-6 top-1/2 transform -translate-y-1/2 w-3 h-3 sm:w-4 sm:h-4 pointer-events-none"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="#b89968"
-                        strokeWidth="2"
-                      >
-                        <polyline points="6 9 12 15 18 9" />
-                      </svg>
-                    </div>
-
-                    <button className="w-full bg-gradient-to-r from-[#D33230] via-[#FD8F04] to-[#D33230] text-white py-4 sm:py-5 text-[10px] sm:text-xs tracking-widest hover:opacity-90 transition-all mt-3 sm:mt-4">
-                      CHECK AVAILABILITY
-                    </button>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      disabled={isSubmitting}
+                      placeholder="Phone Number"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-amber-600 outline-none transition-all"
+                    />
+                    <input
+                      type="text"
+                      name="subject"
+                      value={formData.subject}
+                      onChange={handleChange}
+                      disabled={isSubmitting}
+                      placeholder="Subject"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-amber-600 outline-none transition-all"
+                    />
                   </div>
-                </div>
+                  <textarea
+                    name="message"
+                    required
+                    rows="5"
+                    value={formData.message}
+                    onChange={handleChange}
+                    disabled={isSubmitting}
+                    placeholder="Your Message..."
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 focus:border-amber-600 outline-none transition-all resize-none"
+                  ></textarea>
+
+                  <motion.button
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full py-4 bg-gray-900 text-white font-bold tracking-[0.2em] uppercase text-xs hover:bg-amber-600 transition-colors disabled:bg-gray-400 shadow-lg"
+                  >
+                    {isSubmitting ? "Sending..." : "Send Message"}
+                  </motion.button>
+                </form>
               </div>
             </div>
           </div>
