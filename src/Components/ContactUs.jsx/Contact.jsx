@@ -340,9 +340,10 @@ const Contact = () => {
                 className="text-gray-600 text-sm leading-relaxed mb-12"
                 variants={itemVariants}
               >
-                Lorem Ipsum is simply free text available dolor sit amet
-                consectetur notted adipisicing elit sed do eiusmod tempor
-                incididunt simply dolore magna.
+                Our website is currently undergoing updates, but our team is
+                still here to help. If you have any questions or need
+                assistance, please reach out to us via the details below. We aim
+                to respond to all inquiries within 24 hours.
               </motion.p>
 
               {/* Contact Info Cards */}
